@@ -1,7 +1,9 @@
 ---
-  - set_fact: timestamp="{{lookup('pipe','date +%Y%m%d%H%M%S')}}"
-  - set_fact: app_path="{{rails_app_root}}/{{rails_app_name}}/releases/{{timestamp}}"
+  - name: install postgres gem dependency
+    apt: name=libpq-dev
+    become: true
 
+  - set_fact: app_name="{{rails_app_name}}-{{rails_env}}"
   - name: create necessary directories
     file:
       path="{{item}}"
@@ -12,6 +14,27 @@
     become: true
     with_items:
       - "{{rails_app_root}}"
+      - "/opt/{{rails_app_name}}"
+
+  - name: copy rails app package
+    copy:
+      src="../{{rails_app_name}}/pkg/{{app_name}}.tgz"
+      dest="/opt/{{rails_app_name}}"
+
+  - stat: path="/opt/{{rails_app_name}}/{{app_name}}.tgz"
+    register: rails_pkg
+  - set_fact: uid={{rails_pkg.stat.md5}}
+  - set_fact: app_path="{{rails_app_root}}/{{rails_app_name}}/releases/{{uid}}"
+
+  - name: create release specific directories
+    file:
+      path="{{item}}"
+      state=directory
+      owner={{ansible_user_id}}
+      group={{ansible_user_id}}
+      recurse=yes
+    become: true
+    with_items:
       - "{{app_path}}"
 
   - name: Copying the ror app tar from local to vm
@@ -24,11 +47,23 @@
   - name: bundle install
     command: bundle install chdir={{app_path}}/{{rails_app_name}}-{{rails_env}}
 
+  - name: copy configuration
+    template: src={{item.src}} dest="{{app_path}}/{{rails_app_name}}-{{rails_env}}/config/{{item.dest}}"
+    notify: restart nginx
+    with_items:
+      - {src: database.yml.j2, dest: database.yml}
+      - {src: secrets.yml.j2, dest: secrets.yml}
+
   - name: stop rails app
     shell: "ps aux | grep [p]uma | awk '{print $2}' | xargs kill -9"
 
   - name: make recent release as current
     file: src={{app_path}}/{{rails_app_name}}-{{rails_env}} dest={{rails_app_root}}/{{rails_app_name}}/current owner={{ansible_user_id}} group={{ansible_user_id}} state=link
+
+  - name: run rake tasks
+    command: bundle exec rake {{item}} chdir={{rails_app_root}}/{{rails_app_name}}/current
+    with_items:
+      - db:migrate
 
   - name: start rails app
     command: bundle exec rails s puma -d chdir={{rails_app_root}}/{{rails_app_name}}/current

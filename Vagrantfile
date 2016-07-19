@@ -2,6 +2,13 @@ Vagrant.configure(2) do |config|
 
   machines = [
     {
+      :name => "database.example.com",
+      :ipaddress => "10.1.10.2",
+      :memory => "512",
+      :box => "ubuntu/trusty64",
+      :ports => []
+    },
+    {
       :name => "app-server.example.com",
       :ipaddress => "10.1.10.3",
       :memory => "1024",
@@ -9,13 +16,6 @@ Vagrant.configure(2) do |config|
       :ports => [
         {:guest => 3000, :host => 8084}
       ]
-    },
-    {
-      :name => "database.example.com",
-      :ipaddress => "10.1.10.4",
-      :memory => "512",
-      :box => "ubuntu/trusty64",
-      :ports => []
     },
   ]
 
@@ -41,12 +41,16 @@ Vagrant.configure(2) do |config|
     ansible.extra_vars = {
       rails_app_name: 'basic-app',
       rails_app_root: '/var/www',
-      rails_env: 'development'
+      rails_env: 'development',
+      database_trusted_hosts: ['10.1.10.3/32'],
+      database_host: '10.1.10.2',
+      database_name: 'basic_app',
+      database_username: 'basic',
+      database_password: 'password'
     }
     ansible.groups = {
-      "web-server" => ["web-server.example.com"],
-      "app-server" => ["app-server.example.com"],
       "database" => ["database.example.com"],
+      "app-server" => ["app-server.example.com"]
     }
   end
 

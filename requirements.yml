@@ -1,3 +1,4 @@
 #install dependent role from galaxy
 - src: rvm_io.rvm1-ruby
 - src: geerlingguy.nginx
+- src: ANXS.postgresql

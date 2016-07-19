@@ -1,4 +1,9 @@
 ---
+  - name: configure database
+    hosts: database
+    roles:
+      - database
+
   - name: configure app server
     hosts: app-server
     roles:
