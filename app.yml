@@ -1,0 +1,5 @@
+---
+  - name: configure app server
+    hosts: app-server
+    roles:
+      - rails

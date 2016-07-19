@@ -1,0 +1,6 @@
+.vagrant/
+vault_pass.txt
+.idea
+data/
+*.pyc
+app.retry

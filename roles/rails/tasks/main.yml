@@ -1,0 +1,35 @@
+---
+  - set_fact: timestamp="{{lookup('pipe','date +%Y%m%d%H%M%S')}}"
+  - set_fact: app_path="{{rails_app_root}}/{{rails_app_name}}/releases/{{timestamp}}"
+
+  - name: create necessary directories
+    file:
+      path="{{item}}"
+      state=directory
+      owner={{ansible_user_id}}
+      group={{ansible_user_id}}
+      recurse=yes
+    become: true
+    with_items:
+      - "{{rails_app_root}}"
+      - "{{app_path}}"
+
+  - name: Copying the ror app tar from local to vm
+    unarchive:
+      src="../{{rails_app_name}}/pkg/{{rails_app_name}}-{{rails_env}}.tgz"
+      dest={{app_path}}
+      owner={{ansible_user_id}}
+      group={{ansible_user_id}}
+
+  - name: bundle install
+    command: bundle install chdir={{app_path}}/{{rails_app_name}}-{{rails_env}}
+
+  - name: stop rails app
+    shell: "ps aux | grep [p]uma | awk '{print $2}' | xargs kill -9"
+
+  - name: make recent release as current
+    file: src={{app_path}}/{{rails_app_name}}-{{rails_env}} dest={{rails_app_root}}/{{rails_app_name}}/current owner={{ansible_user_id}} group={{ansible_user_id}} state=link
+
+  - name: start rails app
+    command: bundle exec rails s puma -d chdir={{rails_app_root}}/{{rails_app_name}}/current
+    notify: restart nginx
