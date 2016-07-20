@@ -38,15 +38,9 @@ Vagrant.configure(2) do |config|
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "app.yml"
     ansible.host_key_checking = false
+    ansible.raw_arguments = "--vault-password-file=vault_pass.txt"
     ansible.extra_vars = {
-      rails_app_name: 'basic-app',
-      rails_app_root: '/var/www',
-      rails_env: 'development',
-      database_trusted_hosts: ['10.1.10.3/32'],
-      database_host: '10.1.10.2',
-      database_name: 'basic_app',
-      database_username: 'basic',
-      database_password: 'password'
+      env: 'ci'
     }
     ansible.groups = {
       "database" => ["database.example.com"],

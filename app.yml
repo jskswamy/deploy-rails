@@ -1,10 +1,14 @@
 ---
   - name: configure database
     hosts: database
+    vars_files:
+      - "config/{{env}}.yml"
     roles:
       - database
 
   - name: configure app server
     hosts: app-server
+    vars_files:
+      - "config/{{env}}.yml"
     roles:
       - rails

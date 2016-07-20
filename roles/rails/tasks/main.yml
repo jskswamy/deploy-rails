@@ -23,6 +23,7 @@
 
   - stat: path="/opt/{{rails_app_name}}/{{app_name}}.tgz"
     register: rails_pkg
+
   - set_fact: uid={{rails_pkg.stat.md5}}
   - set_fact: app_path="{{rails_app_root}}/{{rails_app_name}}/releases/{{uid}}"
 
@@ -37,15 +38,21 @@
     with_items:
       - "{{app_path}}"
 
-  - name: Copying the ror app tar from local to vm
+  - name: gather stats for new version of the app
+    stat: path="{{app_path}}"
+    register: version
+
+  - name: extract app
     unarchive:
       src="../{{rails_app_name}}/pkg/{{rails_app_name}}-{{rails_env}}.tgz"
       dest={{app_path}}
       owner={{ansible_user_id}}
       group={{ansible_user_id}}
+    when: version.changed
 
   - name: bundle install
     command: bundle install chdir={{app_path}}/{{rails_app_name}}-{{rails_env}}
+    when: version.changed
 
   - name: copy configuration
     template: src={{item.src}} dest="{{app_path}}/{{rails_app_name}}-{{rails_env}}/config/{{item.dest}}"
@@ -53,18 +60,23 @@
     with_items:
       - {src: database.yml.j2, dest: database.yml}
       - {src: secrets.yml.j2, dest: secrets.yml}
+    when: version.changed
 
   - name: stop rails app
     shell: "ps aux | grep [p]uma | awk '{print $2}' | xargs kill -9"
+    when: version.changed
 
   - name: make recent release as current
     file: src={{app_path}}/{{rails_app_name}}-{{rails_env}} dest={{rails_app_root}}/{{rails_app_name}}/current owner={{ansible_user_id}} group={{ansible_user_id}} state=link
+    when: version.changed
 
   - name: run rake tasks
     command: bundle exec rake {{item}} chdir={{rails_app_root}}/{{rails_app_name}}/current
     with_items:
       - db:migrate
+    when: version.changed
 
   - name: start rails app
     command: bundle exec rails s puma -d chdir={{rails_app_root}}/{{rails_app_name}}/current
+    when: version.changed
     notify: restart nginx
