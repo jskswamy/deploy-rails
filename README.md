@@ -52,7 +52,6 @@ create a vault file `vault_pass.txt` with content as your password
 
 ```txt
 password
-
 ```
 
 #### config files
