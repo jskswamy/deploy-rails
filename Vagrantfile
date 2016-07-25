@@ -40,7 +40,7 @@ Vagrant.configure(2) do |config|
     ansible.host_key_checking = false
     ansible.raw_arguments = "--vault-password-file=vault_pass.txt"
     ansible.extra_vars = {
-      env: 'ci'
+      env: 'development'
     }
     ansible.groups = {
       "database" => ["database.example.com"],

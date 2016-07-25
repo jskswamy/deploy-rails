@@ -4,7 +4,11 @@ Contains necessary playbook to get started with ansible for basic rails apps
 
 ### Requirements
 
-Checkout this project to your rails application parent folder and ensure this application and your rails application exists at same level
+* Need to have the following pre-installed
+  * [ansible](https://www.ansible.com/)
+  * [virtualbox](https://www.virtualbox.org/)
+
+* Checkout this project to your rails application parent folder and ensure this application and your rails application exists at same level
 
 ```sh
 .
@@ -16,7 +20,7 @@ Checkout this project to your rails application parent folder and ensure this ap
 
 ### Rails
 
-Create the following task to package the rails app
+Create the following task to package the rails app in the `lib\tasks` directory with an extension of `.rake`
 
 ```ruby
 require 'rake/packagetask'
@@ -25,28 +29,24 @@ task :delete_pkg do
   FileUtils.rm_rf('pkg')
 end
 
-Rake::PackageTask.new('{{app_name}}', Rails.env) do |p|
+Rake::PackageTask.new(Rails.root.basename.to_s, Rails.env) do |p|
   Rake::Task['delete_pkg'].invoke
 
   p.need_tar = true
   p.package_files = FileList['*', '**/*']
-  p.package_files.exclude('.git', 'pkg/*', '.project', '.settings', '.gitignore', 'data/store/*',
-                          'docs', 'docs/*', 'tmp')
+  p.package_files.exclude('.git', 'pkg/*', '.project', '.settings', '.gitignore', 'data/store/*', 'docs', 'docs/*', 'tmp')
 end
 ```
 
-> Replace app_name with your desired application name
- 
-
 ### Ansible
 
-#### install playbook from galaxy
+#### Install playbook from galaxy from the directory where this repo is checked out
 
 ```bash
 ansible-galaxy install -r requirements.yml
 ```
 
-#### create vault file
+#### Create vault file
 
 create a vault file `vault_pass.txt` with content as your password
 
@@ -84,12 +84,21 @@ config
     - 10.1.10.3/32
 ```
 
+> **Note:** Replace values above with your desired ones
+
 #### encrypt
 
 Ensure to encrypt the config files with vault before pushing it to git.
 
 ```bash
 ansible-vault encrypt --vault-password-file vault_pass.txt config/*.yml
+```
+
+### Decrypt
+To check the values in the config files with ansible-vault:
+
+```bash
+ansible-vault decrypt --vault-password-file vault_pass.txt config/*.yml
 ```
 
 ### Vagrant
