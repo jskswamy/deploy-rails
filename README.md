@@ -75,7 +75,7 @@ config
   rails_app_name: basic-app
   rails_app_root: /var/www
   rails_env: development
-  rails_secret: 1fdb60e4fd34fe66289bdcaa2fb0f5e7fa8f4f52e21e48db8f49d640db6da02213d4fff25cbcc5f0d57589925fc5a67012cd4586a1ba332e81178b37fb22a36a
+  rails_secret_key_base: 1fdb60e4fd34fe66289bdcaa2fb0f5e7fa8f4f52e21e48db8f49d640db6da02213d4fff25cbcc5f0d57589925fc5a67012cd4586a1ba332e81178b37fb22a36a
   database_host: 10.1.10.2
   database_name: basic_app
   database_username: basic
@@ -86,7 +86,7 @@ config
 
 > **Note:** Replace values above with your desired ones
 
-#### encrypt
+#### Encrypt
 
 Ensure to encrypt the config files with vault before pushing it to git.
 
@@ -109,6 +109,16 @@ Ensure you have installed latest version of vagrant by executing:
 vagrant --version
 ```
 
-### Provisioning
+### Provisioning (only needed when starting from scratch)
 
 Now, execute `vagrant up --provision` to begin provisioning the rails app.
+
+> **Note:** Ensure to Decrypt the config files before provisioning using the decrypt command above.
+
+### Bringing up the vagrant box once its been provisioned
+```bash
+vagrant up
+```
+
+### Accessing the Rails app
+Hit [this](http://10.1.10.3/) url from your browser.

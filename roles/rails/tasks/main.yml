@@ -1,4 +1,8 @@
 ---
+  - name: install git dependency
+    apt: name=git-all
+    become: true
+
   - name: install postgres gem dependency
     apt: name=libpq-dev
     become: true
@@ -50,9 +54,11 @@
       group={{ansible_user_id}}
     when: version.changed
 
+  - name: create missing directories
+    command: mkdir -p {{app_path}}/{{rails_app_name}}-{{rails_env}}/config
+
   - name: bundle install
     command: bundle install chdir={{app_path}}/{{rails_app_name}}-{{rails_env}}
-    when: version.changed
 
   - name: copy configuration
     template: src={{item.src}} dest="{{app_path}}/{{rails_app_name}}-{{rails_env}}/config/{{item.dest}}"
