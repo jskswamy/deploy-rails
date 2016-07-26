@@ -1,0 +1,50 @@
+---
+  - set_fact: app_path="{{rails_app_root}}/{{rails_app_name}}/current"
+
+  - name: create development specific directories
+    file:
+      path="{{item}}"
+      state=directory
+      owner={{ansible_user_id}}
+      group={{ansible_user_id}}
+      recurse=yes
+    become: true
+    with_items:
+      - "{{rails_app_root}}/{{rails_app_name}}"
+
+  - name: remove deployed app if any
+    file:
+      path="{{item}}"
+      state=absent
+      owner={{ansible_user_id}}
+      group={{ansible_user_id}}
+    become: true
+    with_items:
+      - "{{app_path}}"
+
+  - name: copy configuration
+    template: src={{item.src}} dest="/opt/shared/app/config/{{item.dest}}"
+    notify: restart nginx
+    with_items:
+      - {src: database.yml.j2, dest: database.yml}
+      - {src: secrets.yml.j2, dest: secrets.yml}
+
+  - name: link development dir as app root
+    file:
+      src=/opt/shared/app dest="{{app_path}}"
+      state=link
+      owner={{ansible_user_id}}
+      group={{ansible_user_id}}
+    become: true
+
+  - name: bundle install
+    command: bundle install chdir={{app_path}}
+
+  - name: run rake tasks
+    command: bundle exec rake {{item}} chdir={{app_path}}
+    with_items:
+      - db:migrate
+
+  - name: start rails app
+    command: bundle exec rails s puma -d chdir={{app_path}}
+    notify: restart nginx

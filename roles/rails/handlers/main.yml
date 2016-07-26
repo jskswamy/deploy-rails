@@ -1,4 +1,4 @@
 ---
   - name: restart nginx
-    command: service nginx restart
+    service: name=nginx state=restarted
     become: true

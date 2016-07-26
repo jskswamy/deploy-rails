@@ -6,15 +6,17 @@ Vagrant.configure(2) do |config|
       :ipaddress => "10.1.10.2",
       :memory => "512",
       :box => "ubuntu/trusty64",
-      :ports => []
+      :ports => [],
+      :shared_folders => []
     },
     {
       :name => "app-server.example.com",
       :ipaddress => "10.1.10.3",
       :memory => "1024",
       :box => "ubuntu/trusty64",
-      :ports => [
-        {:guest => 3000, :host => 8084}
+      :ports => [],
+      :shared_folders => [
+        {:dest => '/opt/shared/app', :src => '../basic-app'}
       ]
     },
   ]
@@ -26,6 +28,10 @@ Vagrant.configure(2) do |config|
       instance.vm.network "private_network", ip: machine[:ipaddress]
       machine[:ports].each do |port|
         instance.vm.network "forwarded_port", host: port[:host], guest: port[:guest]
+      end
+
+      machine[:shared_folders].each do |shared_folder|
+        config.vm.synced_folder shared_folder[:src], shared_folder[:dest]
       end
 
       instance.vm.provider "virtualbox" do |vb|
