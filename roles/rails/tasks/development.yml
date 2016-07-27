@@ -43,7 +43,10 @@
   - name: run rake tasks
     command: bundle exec rake {{item}} chdir={{app_path}}
     with_items:
+      - db:drop
+      - db:create
       - db:migrate
+      - db:seed
 
   - name: start rails app
     command: bundle exec rails s puma -d chdir={{app_path}}

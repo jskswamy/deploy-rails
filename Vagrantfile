@@ -14,7 +14,9 @@ Vagrant.configure(2) do |config|
       :ipaddress => "10.1.10.3",
       :memory => "1024",
       :box => "ubuntu/trusty64",
-      :ports => [],
+      :ports => [
+        {:guest => 3000, :host => 8084}
+      ],
       :shared_folders => [
         {:dest => '/opt/shared/app', :src => '../basic-app'}
       ]

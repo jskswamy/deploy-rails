@@ -42,7 +42,7 @@
       dest={{app_path}}
       owner={{ansible_user_id}}
       group={{ansible_user_id}}
-      
+
   - name: copy configuration
     template: src={{item.src}} dest="{{app_path}}/{{rails_app_name}}-{{rails_env}}/config/{{item.dest}}"
     notify: restart nginx
