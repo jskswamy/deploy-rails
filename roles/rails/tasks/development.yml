@@ -38,6 +38,10 @@
       group={{ansible_user_id}}
     become: true
 
+  - name: Assign the vagrant user to the rvm group
+    command: usermod -a -G rvm vagrant
+    become: true
+
   - name: bundle install
     command: bundle install chdir={{app_path}}
 
