@@ -128,7 +128,7 @@ Hit [this](http://10.1.10.3/) url from your browser.
 Ansible scripts are respects the env variable and provision the VM's (Virtualbox) accordingly.
 
 #### Development
-If the env value in the Vagrantfile is defined as development
+If the `env` value in the `Vagrantfile` is defined as `development`
 
 ```ruby
 config.vm.provision "ansible" do |ansible|
@@ -140,10 +140,19 @@ config.vm.provision "ansible" do |ansible|
 end
 ```
 
-then the Ansible uses the shared project dir mounted through vm's synced folder option will be used to run the application, the changes to underlying code base if be reflected immediately
+then ansible uses the shared project dir (mounted through the vm's synced folder option) to run the application, the changes to underlying codebase will be reflected immediately.
+
+#### Running tests
+
+To run the tests, please ssh into the vagrant box:
+```bash
+vagrant ssh app-server.example.com
+cd /opt/shared/app
+bundle exec rake
+```
 
 #### Deployment
-If the env value in the Vagrantfile is defined as any other valid environment then, ansible will search of the corresponding `tgz` package and deploys the application using that.
+If the `env` value in the `Vagrantfile` is defined as any other valid environment then, ansible will search of the corresponding `tgz` package and will deploy the application using that.
 
 ```ruby
 config.vm.provision "ansible" do |ansible|
@@ -154,4 +163,4 @@ config.vm.provision "ansible" do |ansible|
     ...
 end
 ```
-> for deployment env can be either: ci, qa, uat or production
+> for deployment `env` can be either: ci, qa, uat or production
