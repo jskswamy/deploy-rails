@@ -7,7 +7,8 @@ Vagrant.configure(2) do |config|
       :memory => "512",
       :box => "ubuntu/trusty64",
       :ports => [],
-      :shared_folders => []
+      :shared_folders => [],
+      :shared_files => []
     },
     {
       :name => "app-server.example.com",
@@ -19,6 +20,11 @@ Vagrant.configure(2) do |config|
       ],
       :shared_folders => [
         {:dest => '/opt/shared/app', :src => '../basic-app'}
+      ],
+      :shared_files => [
+        {:dest => '.gitconfig', :src => '~/.gitconfig'},
+        {:dest => '.gemrc', :src => '~/.gemrc'},
+        {:dest => '.irbrc', :src => '~/.irbrc'},
       ]
     },
   ]
@@ -34,6 +40,10 @@ Vagrant.configure(2) do |config|
 
       machine[:shared_folders].each do |shared_folder|
         config.vm.synced_folder shared_folder[:src], shared_folder[:dest]
+      end
+
+      machine[:shared_files].each do |shared_file|
+        config.vm.provision 'file', source: shared_file[:src], destination: shared_file[:dest] if File.exists?(shared_file[:src])
       end
 
       instance.vm.provider "virtualbox" do |vb|
