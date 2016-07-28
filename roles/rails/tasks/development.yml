@@ -28,6 +28,7 @@
     with_items:
       - {src: database.yml.j2, dest: database.yml}
       - {src: secrets.yml.j2, dest: secrets.yml}
+    when: override_dev_configuration
 
   - name: link development dir as app root
     file:
