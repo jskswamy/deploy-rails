@@ -122,3 +122,36 @@ vagrant up
 
 ### Accessing the Rails app
 Hit [this](http://10.1.10.3/) url from your browser.
+
+### Development vs Deployment
+
+Ansible scripts are respects the env variable and provision the VM's (Virtualbox) accordingly.
+
+#### Development
+If the env value in the Vagrantfile is defined as development
+
+```ruby
+config.vm.provision "ansible" do |ansible|
+	...
+    ansible.extra_vars = {
+      env: 'development'
+    }
+    ...
+end
+```
+
+then the Ansible uses the shared project dir mounted through vm's synced folder option will be used to run the application, the changes to underlying code base if be reflected immediately
+
+#### Deployment
+If the env value in the Vagrantfile is defined as any other valid environment then, ansible will search of the corresponding `tgz` package and deploys the application using that.
+
+```ruby
+config.vm.provision "ansible" do |ansible|
+	...
+    ansible.extra_vars = {
+      env: 'ci'
+    }
+    ...
+end
+```
+> for deployment env can be either: ci, qa, uat or production
