@@ -1,0 +1,5 @@
+gem: --no-ri --no-rdoc --no-document --clear-sources
+:backtrace: true
+:ssl_verify_mode: 0
+:sources:
+- http://rubygems.org

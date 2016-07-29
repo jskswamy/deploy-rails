@@ -18,6 +18,13 @@
     with_items:
       - "{{rails_app_root}}"
 
+  - name: create config files
+    template: src={{item.src}} dest="{{item.dest}}"
+    with_items:
+      - {src: .gemrc, dest: "~/.gemrc"}
+      - {src: .irbrc, dest: "~/.irbrc"}
+      - {src: .bundle/config, dest: "~/.bundle/config"}
+
   - include: deploy.yml
     when: env != 'development'
 
